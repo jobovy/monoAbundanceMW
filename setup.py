@@ -15,7 +15,7 @@ setup(name='monoAbundanceMW',
       url='https://github.com/jobovy/monoAbundanceMW',
       package_dir = {'monoAbundanceMW/': ''},
       packages=['monoAbundanceMW'],
-      package_data={'monoAbundanceMW': ['data/*.sav']},
+      package_data={'monoAbundanceMW': ['data/monoAbundanceResults.fits']},
       dependency_links = ['https://github.com/esheldon/fitsio/tarball/master#egg=fitsio'],
       install_requires=['numpy','fitsio']
       )
