@@ -180,7 +180,7 @@ def sigmaz(feh,afe,z=1000.,R=8.,err=False):
         raise NotImplementedError("Err for sigmaz not implemented yet")
         return (results['hr'][indx][0],results['hr_err'][indx][0])
     else:
-        d= (z-results['zmedian'][indx])/1000.
+        d= (z-results['zmedian'][indx][0])/1000.
         return (results['sz'][indx][0]+d*results['p1'][indx][0]\
             +d**2.*results['p2'][indx][0])*math.exp(-(R-8.)/results['hsz'][indx][0])
 
