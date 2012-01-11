@@ -184,3 +184,42 @@ def sigmaz(feh,afe,z=1000.,R=8.,err=False):
         return (results['sz'][indx][0]+d*results['p1'][indx][0]\
             +d**2.*results['p2'][indx][0])*math.exp(-(R-8.)/results['hsz'][indx][0])
 
+def sigmazSlope(feh,afe,err=False):
+    """
+    NAME:
+
+       sigmazSlope
+
+    PURPOSE:
+
+       return the slope of the vertical velocity dispersion as a function of feh,afe
+
+    INPUT:
+
+       feh - metallicity
+
+       afe - alpha-enhancement
+
+       err= (default: False) if True, also return error
+
+    OUTPUT:
+    
+       slope of the vertical velocity dispersion [km s^-1 kpc^-1]
+
+    HISTORY:
+
+       2012-01-10 - Written - Bovy (IAS/@Tucson)
+
+    """
+    #First determine whether this point lies within the fit range
+    if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
+                     *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
+        return 0.
+    #Then find the relevant bin
+    indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
+        *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    if err:
+        return (results['p1'][indx][0],results['p1_err'][indx][0])
+    else:
+        return results['p1'][indx][0]
+
