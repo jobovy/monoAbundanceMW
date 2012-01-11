@@ -10,6 +10,31 @@ _DFEH=0.1
 _DAFE=0.05
 #Load fits
 results= fitsio.read(_DATANAME)
+def afes():
+    """
+    NAME:
+
+       afes
+
+    PURPOSE:
+
+       return the [alpha/Fe] for which we have measurements
+
+    INPUT:
+
+       (none)
+
+    OUTPUT:
+
+       [alpha/Fe] for which we have measurements
+
+    HISTORY:
+
+       2012-01-11 - Written - Bovy (IAS/@Tucson)
+
+    """
+    return results['afe']
+
 def abundanceDist(feh,afe,z=None):
     """
     NAME:
@@ -59,6 +84,31 @@ def abundanceDist(feh,afe,z=None):
     else:
         hz= results['hz'][indx][0]
         return results['mass'][indx][0]/2./hz*math.exp(-numpy.fabs(z)/hz)
+
+def fehs():
+    """
+    NAME:
+
+       fehs
+
+    PURPOSE:
+
+       return the [Fe/H] for which we have measurements
+
+    INPUT:
+
+       (none)
+
+    OUTPUT:
+
+       [Fe/H] for which we have measurements
+
+    HISTORY:
+
+       2012-01-11 - Written - Bovy (IAS/@Tucson)
+
+    """
+    return results['feh']
 
 def hz(feh,afe,err=False):
     """
