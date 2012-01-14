@@ -35,7 +35,7 @@ def afes():
     """
     return results['afe']
 
-def abundanceDist(feh,afe,z=None):
+def abundanceDist(feh,afe,z=None,number=False):
     """
     NAME:
 
@@ -65,25 +65,29 @@ def abundanceDist(feh,afe,z=None):
     #First determine whether this point lies within the fit range
     if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
                      *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
-        return 0.
+        return numpy.nan
     #Then find the relevant bin
     indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
         *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    if number:
+        numberFactor= _omegafeh(feh)/_mgfeh(feh)
+    else:
+        numberFactor= 1.
     if z is None:
-        return results['mass'][indx][0]
+        return results['mass'][indx][0]*numberFactor
     elif isinstance(z,(list,numpy.ndarray)):
         hz= results['hz'][indx][0]
         if z[0] is None and not z[1] is None:
-            return results['mass'][indx][0]*(1.-numpy.exp(-z[1]/hz))
+            return results['mass'][indx][0]*(1.-numpy.exp(-z[1]/hz))*numberFactor
         elif z[1] is None and not z[0] is None:
-            return results['mass'][indx][0]*numpy.exp(-z[0]/hz)
+            return results['mass'][indx][0]*numpy.exp(-z[0]/hz)*numberFactor
         elif z[0] is None and z[1] is None:
-            return results['mass'][indx][0]
+            return results['mass'][indx][0]*numberFactor
         else:
-            return results['mass'][indx][0]*(numpy.exp(-z[0]/hz)-numpy.exp(-z[1]/hz))
+            return results['mass'][indx][0]*(numpy.exp(-z[0]/hz)-numpy.exp(-z[1]/hz))*numberFactor
     else:
         hz= results['hz'][indx][0]
-        return results['mass'][indx][0]/2./hz*math.exp(-numpy.fabs(z)/hz)
+        return results['mass'][indx][0]/2./hz*math.exp(-numpy.fabs(z)/hz)*numberFactor
 
 def fehs():
     """
@@ -140,7 +144,7 @@ def hz(feh,afe,err=False):
     #First determine whether this point lies within the fit range
     if numpy.sum((numpy.fabs(results['feh']-feh) < _DFEH/2.)\
                      *(numpy.fabs(results['afe']-afe) < _DAFE/2.)) == 0.:
-        return 0.
+        return numpy.nan
     #Then find the relevant bin
     indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
         *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
@@ -179,7 +183,7 @@ def hr(feh,afe,err=False):
     #First determine whether this point lies within the fit range
     if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
                      *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
-        return 0.
+        return numpy.nan
     #Then find the relevant bin
     indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
         *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
@@ -222,7 +226,7 @@ def sigmaz(feh,afe,z=1000.,R=8.,err=False):
     #First determine whether this point lies within the fit range
     if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
                      *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
-        return 0.
+        return numpy.nan
     #Then find the relevant bin
     indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
         *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
@@ -264,7 +268,7 @@ def sigmazSlope(feh,afe,err=False):
     #First determine whether this point lies within the fit range
     if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
                      *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
-        return 0.
+        return numpy.nan
     #Then find the relevant bin
     indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
         *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
@@ -273,3 +277,7 @@ def sigmazSlope(feh,afe,err=False):
     else:
         return results['p1'][indx][0]
 
+def _mgfeh(feh):
+    return 0.956+0.205*feh+0.051*feh**2.
+def _omegafeh(feh):
+    return 0.0425+0.0198*feh+0.0057*feh**2.
