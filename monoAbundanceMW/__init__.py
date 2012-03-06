@@ -53,6 +53,8 @@ def abundanceDist(feh,afe,z=None,number=False):
 
        z= default=None: integrated over height; if set to number, evaluate at this height, if set to range, integrated between these numbers (can have None to indicate zero or infinity) [pc]
 
+       number= (default: False) if True, return the number density of G-type dwarfs
+
     OUTPUT:
 
        surface-mass density (or mass-density if z=number)
