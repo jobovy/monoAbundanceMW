@@ -224,6 +224,8 @@ def sigmaz(feh,afe,z=None,R=8.,err=False):
 
        2012-01-10 - Written - Bovy (IAS/@Tucson)
 
+       2012-05-03 - change default z - Bovy (IAS)
+
     """
     #First determine whether this point lies within the fit range
     if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
