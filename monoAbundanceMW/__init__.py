@@ -194,7 +194,7 @@ def hr(feh,afe,err=False):
     else:
         return results['hr'][indx][0]
 
-def sigmaz(feh,afe,z=1000.,R=8.,err=False):
+def sigmaz(feh,afe,z=None,R=8.,err=False):
     """
     NAME:
 
@@ -210,7 +210,7 @@ def sigmaz(feh,afe,z=1000.,R=8.,err=False):
 
        afe - alpha-enhancement
 
-       z= (default: 1000) height [pc]
+       z= (default: median height of data sample) height [pc]
 
        R= (default 8) Galactocentric radius [kpc]
 
@@ -232,6 +232,8 @@ def sigmaz(feh,afe,z=1000.,R=8.,err=False):
     #Then find the relevant bin
     indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
         *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    if z is None:
+        z= results['zmedian'][indx][0]
     if err:
         raise NotImplementedError("Err for sigmaz not implemented yet")
         return (results['hr'][indx][0],results['hr_err'][indx][0])
