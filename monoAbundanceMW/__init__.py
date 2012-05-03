@@ -237,8 +237,9 @@ def sigmaz(feh,afe,z=None,R=8.,err=False):
     if z is None:
         z= results['zmedian'][indx][0]
     if err:
-        raise NotImplementedError("Err for sigmaz not implemented yet")
-        return (results['hr'][indx][0],results['hr_err'][indx][0])
+        if z != results['zmedian'][indx][0]:
+            raise NotImplementedError("Err for sigmaz not implemented for z =/= zmedian")
+        return (results['sz'][indx][0],results['sz_err'][indx][0])
     else:
         d= (z-results['zmedian'][indx][0])/1000.
         return (results['sz'][indx][0]+d*results['p1'][indx][0]\
@@ -282,6 +283,45 @@ def sigmazSlope(feh,afe,err=False):
         return (results['p1'][indx][0],results['p1_err'][indx][0])
     else:
         return results['p1'][indx][0]
+
+def sigmazCurv(feh,afe,err=False):
+    """
+    NAME:
+
+       sigmazCurv
+
+    PURPOSE:
+
+       return the second Z-derivative of the vertical velocity dispersion as a function of feh,afe
+
+    INPUT:
+
+       feh - metallicity
+
+       afe - alpha-enhancement
+
+       err= (default: False) if True, also return error
+
+    OUTPUT:
+    
+       second derivative of the vertical velocity dispersion [km s^-1 kpc^-2]
+
+    HISTORY:
+
+       2012-05-03 - Written - Bovy (IAS)
+
+    """
+    #First determine whether this point lies within the fit range
+    if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
+                     *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
+        return numpy.nan
+    #Then find the relevant bin
+    indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
+        *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    if err:
+        return (results['p2'][indx][0],results['p2_err'][indx][0])
+    else:
+        return results['p2'][indx][0]
 
 def _mgfeh(feh):
     return 0.956+0.205*feh+0.051*feh**2.
