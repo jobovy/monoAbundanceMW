@@ -194,6 +194,41 @@ def hr(feh,afe,err=False):
     else:
         return results['hr'][indx][0]
 
+def meanhr(z=1000.):
+    """
+    NAME:
+
+       meanhr
+
+    PURPOSE:
+
+       return the mean radial scale length as a function of height z
+
+    INPUT:
+
+       z= height from the plane (pc)
+
+    OUTPUT:
+    
+       mean radial scale length in kpc at height z
+
+    HISTORY:
+
+       2012-05-25 - Written - Bovy (IAS)
+
+    """
+    #First get the weights and hrs
+    w= numpy.zeros(len(results['afe']))
+    hrs= numpy.zeros_like(w)
+    for ii in range(len(results['afe'])):
+        w[ii]= abundanceDist(results['feh'][ii],results['afe'][ii],
+                             z=z,number=False)
+        hrs[ii]= hr(results['feh'][ii],results['afe'][ii])
+    #Cut out pops with undetermined scale lengths (very little mass)
+    indx= (hrs < 4.5)
+    #Then return
+    return numpy.sum(w[indx]*hrs[indx])/numpy.sum(w[indx])
+
 def meansigmaz(z=1000.):
     """
     NAME:
