@@ -116,45 +116,6 @@ def fehs():
     """
     return results['feh']
 
-def hz(feh,afe,err=False):
-    """
-    NAME:
-
-       hz
-
-    PURPOSE:
-
-       return the vertical scale height as a function of feh,afe
-
-    INPUT:
-
-       feh - metallicity
-
-       afe - alpha-enhancement
-
-       err= (default: False) if True, also return error
-
-    OUTPUT:
-
-       vertical scale height in pc (, +uncertainty)
-
-    HISTORY:
-
-       2012-01-10 - Written - Bovy (IAS/@Tucson)
-
-    """
-    #First determine whether this point lies within the fit range
-    if numpy.sum((numpy.fabs(results['feh']-feh) < _DFEH/2.)\
-                     *(numpy.fabs(results['afe']-afe) < _DAFE/2.)) == 0.:
-        return numpy.nan
-    #Then find the relevant bin
-    indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-        *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
-    if err:
-        return (results['hz'][indx][0],results['hz_err'][indx][0])
-    else:
-        return results['hz'][indx][0]
-
 def hr(feh,afe,err=False):
     """
     NAME:
@@ -193,6 +154,45 @@ def hr(feh,afe,err=False):
         return (results['hr'][indx][0],results['hr_err'][indx][0])
     else:
         return results['hr'][indx][0]
+
+def hz(feh,afe,err=False):
+    """
+    NAME:
+
+       hz
+
+    PURPOSE:
+
+       return the vertical scale height as a function of feh,afe
+
+    INPUT:
+
+       feh - metallicity
+
+       afe - alpha-enhancement
+
+       err= (default: False) if True, also return error
+
+    OUTPUT:
+
+       vertical scale height in pc (, +uncertainty)
+
+    HISTORY:
+
+       2012-01-10 - Written - Bovy (IAS/@Tucson)
+
+    """
+    #First determine whether this point lies within the fit range
+    if numpy.sum((numpy.fabs(results['feh']-feh) < _DFEH/2.)\
+                     *(numpy.fabs(results['afe']-afe) < _DAFE/2.)) == 0.:
+        return numpy.nan
+    #Then find the relevant bin
+    indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
+        *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    if err:
+        return (results['hz'][indx][0],results['hz_err'][indx][0])
+    else:
+        return results['hz'][indx][0]
 
 def meanhr(z=1000.):
     """
