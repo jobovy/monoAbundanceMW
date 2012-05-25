@@ -194,6 +194,40 @@ def hr(feh,afe,err=False):
     else:
         return results['hr'][indx][0]
 
+def meansigmaz(z=1000.):
+    """
+    NAME:
+
+       meansigmaz
+
+    PURPOSE:
+
+       return the mean vertical velocity dispersion at height Z
+
+    INPUT:
+
+       z= (default: 1000) height [pc]
+
+    OUTPUT:
+    
+       mean vertical velocity dispersion at height Z
+
+    HISTORY:
+
+       2012-05-25 - Written - Bovy (IAS/@Tucson)
+
+    """
+    #First get the weights and sigmazs
+    w= numpy.zeros(len(results['afe']))
+    sz= numpy.zeros_like(w)
+    for ii in range(len(results['afe'])):
+        w[ii]= abundanceDist(results['feh'][ii],results['afe'][ii],
+                             z=z,number=False)
+        sz[ii]= sigmaz(results['feh'][ii],results['afe'][ii],
+                       z=z)
+    #Then return
+    return numpy.sqrt(numpy.sum(w*sz**2.)/numpy.sum(w))
+
 def sigmaz(feh,afe,z=1000.,R=8.,err=False):
     """
     NAME:
