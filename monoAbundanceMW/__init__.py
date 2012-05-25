@@ -229,6 +229,39 @@ def meanhr(z=1000.):
     #Then return
     return numpy.sum(w[indx]*hrs[indx])/numpy.sum(w[indx])
 
+def meanhz(z=1000.):
+    """
+    NAME:
+
+       meanhz
+
+    PURPOSE:
+
+       return the mean vertical scale height as a function of height z
+
+    INPUT:
+
+       z= height from the plane (pc)
+
+    OUTPUT:
+    
+       mean vertical scale height in pc at height z
+
+    HISTORY:
+
+       2012-05-25 - Written - Bovy (IAS)
+
+    """
+    #First get the weights and hrs
+    w= numpy.zeros(len(results['afe']))
+    hzs= numpy.zeros_like(w)
+    for ii in range(len(results['afe'])):
+        w[ii]= abundanceDist(results['feh'][ii],results['afe'][ii],
+                             z=z,number=False)
+        hzs[ii]= hz(results['feh'][ii],results['afe'][ii])
+    #Then return
+    return numpy.sum(w*hzs)/numpy.sum(w)
+
 def meansigmaz(z=1000.):
     """
     NAME:
