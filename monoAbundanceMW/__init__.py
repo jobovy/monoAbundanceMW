@@ -272,7 +272,7 @@ def meanfeh(z=1000.,r=None):
     for ii in range(len(results['afe'])):
         w[ii]= abundanceDist(results['feh'][ii],results['afe'][ii],
                              z=z,r=r,number=False)
-    if True:
+    if False:
         #Cut out pops with undetermined scale lengths (very little mass)
         #indx= (hrs < 4.5)
         indx= (results['afe'] > 0.2)#hrs < 4.5)
@@ -403,7 +403,7 @@ def meanhz(z=1000.):
     #Then return
     return numpy.sum(w*hzs)/numpy.sum(w)
 
-def meansigmaz(z=1000.):
+def meansigmaz(z=1000.,r=None):
     """
     NAME:
 
@@ -416,6 +416,8 @@ def meansigmaz(z=1000.):
     INPUT:
 
        z= (default: 1000) height [pc]
+
+       r= Galactocentric distance (kpc)
 
     OUTPUT:
     
@@ -431,13 +433,13 @@ def meansigmaz(z=1000.):
     sz= numpy.zeros_like(w)
     for ii in range(len(results['afe'])):
         w[ii]= abundanceDist(results['feh'][ii],results['afe'][ii],
-                             z=z,number=False)
+                             z=z,r=r,number=False)
         sz[ii]= sigmaz(results['feh'][ii],results['afe'][ii],
-                       z=z)
+                       z=z,r=r)
     #Then return
     return numpy.sqrt(numpy.sum(w*sz**2.)/numpy.sum(w))
 
-def sigmaz(feh,afe,z=None,R=8.,err=False):
+def sigmaz(feh,afe,z=None,r=None,err=False):
     """
     NAME:
 
@@ -455,7 +457,7 @@ def sigmaz(feh,afe,z=None,R=8.,err=False):
 
        z= (default: median height of data sample) height [pc]
 
-       R= (default 8) Galactocentric radius [kpc]
+       r= (default 8) Galactocentric radius [kpc]
 
        err= (default: False) if True, also return error
 
@@ -470,6 +472,8 @@ def sigmaz(feh,afe,z=None,R=8.,err=False):
        2012-05-03 - change default z - Bovy (IAS)
 
     """
+    if r is None:
+        r= 8.
     #First determine whether this point lies within the fit range
     if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
                      *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
@@ -486,7 +490,7 @@ def sigmaz(feh,afe,z=None,R=8.,err=False):
     else:
         d= (z-results['zmedian'][indx][0])/1000.
         return (results['sz'][indx][0]+d*results['p1'][indx][0]\
-            +d**2.*results['p2'][indx][0])*math.exp(-(R-8.)/results['hsz'][indx][0])
+            +d**2.*results['p2'][indx][0])*math.exp(-(r-8.)/results['hsz'][indx][0])
 
 def sigmazSlope(feh,afe,err=False):
     """
