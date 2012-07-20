@@ -35,7 +35,7 @@ def afes():
     """
     return results['afe']
 
-def abundanceDist(feh,afe,z=None,number=False):
+def abundanceDist(feh,afe,z=None,r=None,number=False):
     """
     NAME:
 
@@ -52,6 +52,8 @@ def abundanceDist(feh,afe,z=None,number=False):
        afe - alpha-enhancement
 
        z= default=None: integrated over height; if set to number, evaluate at this height, if set to range, integrated between these numbers (can have None to indicate zero or infinity) [pc]
+
+       r= default=None: Galactocentric radius in kpc
 
        number= (default: False) if True, return the number density of G-type dwarfs
 
@@ -71,25 +73,71 @@ def abundanceDist(feh,afe,z=None,number=False):
     #Then find the relevant bin
     indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
         *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    if not r is None:
+        rFactor= numpy.exp(-(r-8.)/hr(results['feh'][indx],results['afe'][indx]))
+    else: rFactor= 1.
     if number:
         numberFactor= _omegafeh(feh)/_mgfeh(feh)
     else:
         numberFactor= 1.
     if z is None:
-        return results['mass'][indx][0]*numberFactor
+        return results['mass'][indx][0]*numberFactor*rFactor
     elif isinstance(z,(list,numpy.ndarray)):
         hz= results['hz'][indx][0]
         if z[0] is None and not z[1] is None:
-            return results['mass'][indx][0]*(1.-numpy.exp(-z[1]/hz))*numberFactor
+            return results['mass'][indx][0]*(1.-numpy.exp(-z[1]/hz))*numberFactor*rFactor
         elif z[1] is None and not z[0] is None:
-            return results['mass'][indx][0]*numpy.exp(-z[0]/hz)*numberFactor
+            return results['mass'][indx][0]*numpy.exp(-z[0]/hz)*numberFactor*rFactor
         elif z[0] is None and z[1] is None:
-            return results['mass'][indx][0]*numberFactor
+            return results['mass'][indx][0]*numberFactor*rFactor
         else:
-            return results['mass'][indx][0]*(numpy.exp(-z[0]/hz)-numpy.exp(-z[1]/hz))*numberFactor
+            return results['mass'][indx][0]*(numpy.exp(-z[0]/hz)-numpy.exp(-z[1]/hz))*numberFactor*rFactor
     else:
         hz= results['hz'][indx][0]
-        return results['mass'][indx][0]/2./hz*math.exp(-numpy.fabs(z)/hz)*numberFactor
+        return results['mass'][indx][0]/2./hz*math.exp(-numpy.fabs(z)/hz)*numberFactor*rFactor
+
+def dfehdr(z=1000.):
+    """
+    NAME:
+
+       dfehdr
+
+    PURPOSE:
+
+       return the radial [Fe/H] gradient at height z
+
+    INPUT:
+
+       z= height in pc
+
+    OUTPUT:
+
+       d<[Fe/H]>/dR(z)
+
+    HISTORY:
+
+       2012-07-19 - Written - Bovy (IAS/@MPIA)
+
+    """
+    #First get the weights and hrs
+    w= numpy.zeros(len(results['afe']))
+    hrs= numpy.zeros_like(w)
+    for ii in range(len(results['afe'])):
+        w[ii]= abundanceDist(results['feh'][ii],results['afe'][ii],
+                             z=z,number=False)
+        hrs[ii]= hr(results['feh'][ii],results['afe'][ii])
+    if False:
+        #Cut out pops with undetermined scale lengths (very little mass)
+        indx= (hrs < 4.5)
+        #indx= (results['afe'] >= 0.05)*(results['afe'] < 0.1)
+    else:
+        indx= numpy.zeros(len(w),dtype='bool')+True
+    #Then return
+    return -numpy.sum(w[indx]/hrs[indx]*results['feh'][indx])\
+        /numpy.sum(w[indx])\
+        +numpy.sum(w[indx]*results['feh'][indx])\
+        /numpy.sum(w[indx])**2.\
+        *numpy.sum(w[indx]/hrs[indx])
 
 def fehs():
     """
@@ -193,6 +241,99 @@ def hz(feh,afe,err=False):
         return (results['hz'][indx][0],results['hz_err'][indx][0])
     else:
         return results['hz'][indx][0]
+
+def meanfeh(z=1000.,r=None):
+    """
+    NAME:
+
+       meanfeh
+
+    PURPOSE:
+
+       return the mean [Fe/H] as a function of height z
+
+    INPUT:
+
+       z= height from the plane (pc)
+
+       r= Galactocentric distance (kpc)
+
+    OUTPUT:
+    
+       mean [Fe/H]at height z
+
+    HISTORY:
+
+       2012-07-19 - Written - Bovy (IAS@MPIA)
+
+    """
+    #First get the weights and hrs
+    w= numpy.zeros(len(results['afe']))
+    for ii in range(len(results['afe'])):
+        w[ii]= abundanceDist(results['feh'][ii],results['afe'][ii],
+                             z=z,r=r,number=False)
+    if True:
+        #Cut out pops with undetermined scale lengths (very little mass)
+        #indx= (hrs < 4.5)
+        indx= (results['afe'] > 0.2)#hrs < 4.5)
+    else:
+        indx= numpy.zeros(len(w),dtype='bool')+True
+    #Then return
+    return numpy.sum(w[indx]*results['feh'][indx])/numpy.sum(w[indx])
+
+def medianfeh(z=1000.,r=None):
+    """
+    NAME:
+
+       medianfeh
+
+    PURPOSE:
+
+       return the median [Fe/H] as a function of height z
+
+    INPUT:
+
+       z= height from the plane (pc)
+       
+       r= Galactocentric distance (kpc)
+
+    OUTPUT:
+    
+       median [Fe/H]at height z and radius r
+
+    HISTORY:
+
+       2012-07-19 - Written - Bovy (IAS@MPIA)
+
+    """
+    #First get the weights and hrs
+    w= numpy.zeros(len(results['afe']))
+    for ii in range(len(results['afe'])):
+        w[ii]= abundanceDist(results['feh'][ii],results['afe'][ii],
+                             z=z,r=r,number=False)
+    if False:
+        #Cut out pops with undetermined scale lengths (very little mass)
+        indx= (hrs < 4.5)
+    else:
+        indx= numpy.zeros(len(w),dtype='bool')+True
+    w= w[indx]
+    feh= results['feh'][indx]
+    sortindx= numpy.argsort(feh)
+    feh= feh[sortindx]
+    w= w[sortindx]
+    w/= numpy.sum(w)
+    tot, ii= 0., 0
+    while tot < 0.5:
+        tot+= w[ii]
+        ii+= 1
+    ii-= 1
+    #Then return
+    print w, feh
+    if feh[ii] == feh[ii+1]:
+        return feh[ii]
+    else:
+        nthisfeh= numpy.sum((feh == feh[ii]))
+        return feh[ii]-(tot-0.5)/w[ii]*_DFEH/nthisfeh+_DFEH/2./nthisfeh #NOT SURE THAT THIS WORKS
 
 def meanhr(z=1000.):
     """
