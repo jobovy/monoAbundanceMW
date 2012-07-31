@@ -96,7 +96,7 @@ def abundanceDist(feh,afe,z=None,r=None,number=False):
         hz= results['hz'][indx][0]
         return results['mass'][indx][0]/2./hz*math.exp(-numpy.fabs(z)/hz)*numberFactor*rFactor
 
-def dfehdr(z=1000.):
+def dfehdr(z=1000.,r=None,feh=None,afe=None):
     """
     NAME:
 
@@ -109,6 +109,12 @@ def dfehdr(z=1000.):
     INPUT:
 
        z= height in pc
+
+       r= Galactocentric distance (kpc)
+
+       feh= (default: None) range in feh to consider
+
+       afe= (default: None) range in afe to consider
 
     OUTPUT:
 
@@ -124,7 +130,7 @@ def dfehdr(z=1000.):
     hrs= numpy.zeros_like(w)
     for ii in range(len(results['afe'])):
         w[ii]= abundanceDist(results['feh'][ii],results['afe'][ii],
-                             z=z,number=False)
+                             z=z,r=r,number=False)
         hrs[ii]= hr(results['feh'][ii],results['afe'][ii])
     if False:
         #Cut out pops with undetermined scale lengths (very little mass)
@@ -132,6 +138,10 @@ def dfehdr(z=1000.):
         #indx= (results['afe'] >= 0.05)*(results['afe'] < 0.1)
     else:
         indx= numpy.zeros(len(w),dtype='bool')+True
+    if not feh is None:
+        indx= indx*(results['feh'] > feh[0])*(results['feh'] < feh[1])
+    if not afe is None:
+        indx= indx*(results['afe'] > afe[0])*(results['afe'] < afe[1])
     #Then return
     return -numpy.sum(w[indx]/hrs[indx]*results['feh'][indx])\
         /numpy.sum(w[indx])\
