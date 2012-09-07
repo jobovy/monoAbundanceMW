@@ -231,8 +231,8 @@ def hz(feh,afe,err=False):
 
     """
     #First determine whether this point lies within the fit range
-    if numpy.sum((numpy.fabs(results['feh']-feh) < _DFEH/2.)\
-                     *(numpy.fabs(results['afe']-afe) < _DAFE/2.)) == 0.:
+    if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
+                     *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
         return numpy.nan
     #Then find the relevant bin
     indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
