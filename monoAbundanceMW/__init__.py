@@ -502,6 +502,61 @@ def sigmaz(feh,afe,z=None,r=None,err=False):
         return (results['sz'][indx][0]+d*results['p1'][indx][0]\
             +d**2.*results['p2'][indx][0])*math.exp(-(r-8.)/results['hsz'][indx][0])
 
+def sigmar(feh,afe,z=None,r=None,err=False):
+    """
+    NAME:
+
+       sigmar
+
+    PURPOSE:
+
+       return the radial velocity dispersion at height Z as a function of feh,afe
+
+    INPUT:
+
+       feh - metallicity
+
+       afe - alpha-enhancement
+
+       z= (default: median height of data sample) height [pc]
+
+       r= (default 8) Galactocentric radius [kpc]
+
+       err= (default: False) if True, also return error
+
+    OUTPUT:
+    
+       radial velocity dispersion at height Z
+
+    BUGS:
+
+       needs to be updated to use the slope and quadratic coefficient measurements
+
+    HISTORY:
+
+       2013-03-08 - Written - Bovy (IAS)
+
+    """
+    if r is None:
+        r= 8.
+    #First determine whether this point lies within the fit range
+    if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
+                     *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
+        return numpy.nan
+    #Then find the relevant bin
+    indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
+        *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    if z is None:
+        z= results['zmedian'][indx][0]
+    if err:
+        if z != results['zmedian'][indx][0]:
+            raise NotImplementedError("Err for sigmaz not implemented for z =/= zmedian")
+        return (results['sz'][indx][0],results['sz_err'][indx][0])
+    else:
+        d= (z-results['zmedian'][indx][0])/1000.
+        return (results['sz'][indx][0]+0.*d*results['p1'][indx][0]\
+                    +0.*d**2.*results['p2'][indx][0])*math.exp(-(r-8.)/results['hsz'][indx][0])
+
 def sigmazSlope(feh,afe,err=False):
     """
     NAME:
