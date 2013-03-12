@@ -551,11 +551,11 @@ def sigmar(feh,afe,z=None,r=None,err=False):
     if err:
         if z != results['zmedian'][indx][0]:
             raise NotImplementedError("Err for sigmaz not implemented for z =/= zmedian")
-        return (results['sz'][indx][0],results['sz_err'][indx][0])
+        return (results['sr'][indx][0],results['sr_err'][indx][0])
     else:
         d= (z-results['zmedian'][indx][0])/1000.
-        return (results['sz'][indx][0]+0.*d*results['p1'][indx][0]\
-                    +0.*d**2.*results['p2'][indx][0])*math.exp(-(r-8.)/results['hsz'][indx][0])
+        return (results['sr'][indx][0]+0.*d*results['p1'][indx][0]\
+                    +0.*d**2.*results['p2'][indx][0])*math.exp(-(r-8.)/results['hsr'][indx][0])
 
 def sigmazSlope(feh,afe,err=False):
     """
