@@ -439,7 +439,7 @@ def meansigmaz(z=1000.,r=None):
     #Then return
     return numpy.sqrt(numpy.sum(w*sz**2.)/numpy.sum(w))
 
-def sigmaz(feh,afe,z=None,r=None,err=False):
+def sigmaz(feh,afe,z=None,r=None,err=False,smooth=False,smoothfunc=numpy.mean):
     """
     NAME:
 
@@ -460,6 +460,10 @@ def sigmaz(feh,afe,z=None,r=None,err=False):
        r= (default 8) Galactocentric radius [kpc]
 
        err= (default: False) if True, also return error
+       
+       smooth= (default: False) if True, return a smoothed estimate (using the nine bins around the requested bin, including the input FeH and aFe) (does not work with err=True)
+
+       smoothfunc= function to use for smoothing (default: numpy.mean)
 
     OUTPUT:
     
@@ -472,6 +476,23 @@ def sigmaz(feh,afe,z=None,r=None,err=False):
        2012-05-03 - change default z - Bovy (IAS)
 
     """
+    if smooth and not err:
+        #Smooth sz                                                      
+        up= sigmaz(feh+0.1,afe,z=z,r=r,smooth=False)
+        down= sigmaz(feh-0.1,afe,z=z,r=r,smooth=False)
+        left= sigmaz(feh,afe-0.05,z=z,r=r,smooth=False)
+        right= sigmaz(feh,afe+0.05,z=z,r=r,smooth=False)
+        here= sigmaz(feh,afe,z=z,r=r,smooth=False)
+        upright= sigmaz(feh+0.1,afe+0.05,z=z,r=r,smooth=False)
+        upleft= sigmaz(feh+0.1,afe-0.05,z=z,r=r,smooth=False)
+        downright= sigmaz(feh-0.1,afe+0.05,z=z,r=r,smooth=False)
+        downleft= sigmaz(feh-0.1,afe-0.05,z=z,r=r,smooth=False)
+        allsz= numpy.array([here,up,down,left,right,upright,upleft,downright,
+                            downleft])
+        indx= True-numpy.isnan(allsz)
+        return smoothfunc(allsz[True-numpy.isnan(allsz)])
+    elif smooth and err:
+        raise NotImplementedError("sigmaz with smooth=True and err=True not implemented yet")
     if r is None:
         r= 8.
     #First determine whether this point lies within the fit range
@@ -492,7 +513,7 @@ def sigmaz(feh,afe,z=None,r=None,err=False):
         return (results['sz'][indx][0]+d*results['p1'][indx][0]\
             +d**2.*results['p2'][indx][0])*math.exp(-(r-8.)/results['hsz'][indx][0])
 
-def sigmar(feh,afe,z=None,r=None,err=False):
+def sigmar(feh,afe,z=None,r=None,err=False,smooth=False,smoothfunc=numpy.mean):
     """
     NAME:
 
@@ -514,6 +535,10 @@ def sigmar(feh,afe,z=None,r=None,err=False):
 
        err= (default: False) if True, also return error
 
+       smooth= (default: False) if True, return a smoothed estimate (using the nine bins around the requested bin, including the input FeH and aFe) (does not work with err=True)
+
+       smoothfunc= function to use for smoothing (default: numpy.mean)
+
     OUTPUT:
     
        radial velocity dispersion at height Z
@@ -527,6 +552,23 @@ def sigmar(feh,afe,z=None,r=None,err=False):
        2013-03-08 - Written - Bovy (IAS)
 
     """
+    if smooth and not err:
+        #Smooth sr
+        up= sigmar(feh+0.1,afe,z=z,r=r,smooth=False)
+        down= sigmar(feh-0.1,afe,z=z,r=r,smooth=False)
+        left= sigmar(feh,afe-0.05,z=z,r=r,smooth=False)
+        right= sigmar(feh,afe+0.05,z=z,r=r,smooth=False)
+        here= sigmar(feh,afe,z=z,r=r,smooth=False)
+        upright= sigmar(feh+0.1,afe+0.05,z=z,r=r,smooth=False)
+        upleft= sigmar(feh+0.1,afe-0.05,z=z,r=r,smooth=False)
+        downright= sigmar(feh-0.1,afe+0.05,z=z,r=r,smooth=False)
+        downleft= sigmar(feh-0.1,afe-0.05,z=z,r=r,smooth=False)
+        allsr= numpy.array([here,up,down,left,right,upright,upleft,downright,
+                            downleft])
+        indx= True-numpy.isnan(allsr)
+        return smoothfunc(allsr[True-numpy.isnan(allsr)])
+    elif smooth and err:
+        raise NotImplementedError("sigmaz with smooth=True and err=True not implemented yet")
     if r is None:
         r= 8.
     #First determine whether this point lies within the fit range
