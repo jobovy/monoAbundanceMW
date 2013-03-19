@@ -2,6 +2,12 @@ import os, os.path
 import math
 import numpy
 import fitsio
+try:
+    from galpy.util import bovy_plot
+except ImportError:
+    _GALPYLOADED= False
+else:
+    _GALPYLOADED= True
 _DATADIR= 'data'
 _DATANAME= os.path.join(os.path.dirname(__file__),
                         _DATADIR,'monoAbundanceResults.fits')
@@ -676,6 +682,70 @@ def sigmazCurv(feh,afe,err=False):
         return (results['p2'][indx][0],results['p2_err'][indx][0])
     else:
         return results['p2'][indx][0]
+
+def plotPixelFunc(feh,afe,z,
+                  fehmin=-1.6,fehmax=0.5,afemin=-0.05,afemax=0.55,
+                  **kwargs):
+    """
+    NAME:
+
+       plotPixelFunc
+
+    PURPOSE:
+
+       Plot a function as a function of [Fe/H] and [a/Fe], a la Bovy et 
+       al. (2012)
+
+    INPUT:
+
+       feh - feh values of z
+
+       afe - afe values of z
+
+       z - function to plot (array with the same length as feh and afe)
+
+       bovy_plot.bovy_dens2d kwargs
+
+    OUTPUT:
+
+       plot to output device
+
+    HISTORY:
+       2013-03-19 - Written - Bovy (IAS)
+    """
+    if not _GALPYLOADED:
+        raise ImportError("Use of plotPixelFunc requires galpy's bovy_plot to be installed; install galpy starting at https://github.com/jobovy/galpy")
+    #First create 2D
+    gfeh= numpy.linspace(fehmin+0.05,fehmax-0.05,int((fehmax-fehmin)/0.1))
+    gafe= numpy.linspace(afemin+0.025,afemax-0.025,int((afemax-afemin)/0.05))
+    z2d= numpy.empty((int((fehmax-fehmin)/0.1),int((afemax-afemin)/0.05)))
+    for ii in range(z2d.shape[0]):
+        for jj in range(z2d.shape[1]):
+            if numpy.amin((gfeh[ii]-feh)**2./0.01**2.
+                          +(gafe[jj]-afe)**2./0.05**2.) < 10.**-4.:
+                indx= numpy.argmin((gfeh[ii]-feh)**2./0.01**2.
+                                   +(gafe[jj]-afe)**2./0.05**2.)
+                z2d[ii,jj]= z[indx]
+            else:
+                z2d[ii,jj]= numpy.nan
+    #Now plot
+    xrange=[-1.6,0.5]
+    yrange=[-0.05,0.55]
+    if not kwargs.has_key('colorbar'):
+        kwargs['colorbar']= True
+    if not kwargs.has_key('shrink'):
+        kwargs['shrink']= 0.78
+    if not kwargs.has_key('vmin'):
+        kwargs['vmin']= numpy.nanmin(z2d)
+    if not kwargs.has_key('vmax'):
+        kwargs['vmax']= numpy.nanmax(z2d)
+    return bovy_plot.bovy_dens2d(z2d.T,origin='lower',cmap='jet',
+                                 interpolation='nearest',
+                                 xlabel=r'$[\mathrm{Fe/H}]$',
+                                 ylabel=r'$[\alpha/\mathrm{Fe}]$',
+                                 xrange=xrange,yrange=yrange,
+                                 contours=False,
+                                 **kwargs)
 
 def _mgfeh(feh):
     return 0.956+0.205*feh+0.051*feh**2.
