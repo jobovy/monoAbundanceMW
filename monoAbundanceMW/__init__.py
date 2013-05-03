@@ -11,12 +11,15 @@ else:
 _DATADIR= 'data'
 _DATANAME= os.path.join(os.path.dirname(__file__),
                         _DATADIR,'monoAbundanceResults.fits')
+_DATANAME_K= os.path.join(os.path.dirname(__file__),
+                          _DATADIR,'monoAbundanceResults_k.fits')
 #Binsize
 _DFEH=0.1
 _DAFE=0.05
 #Load fits
 results= fitsio.read(_DATANAME)
-def afes():
+results_k= fitsio.read(_DATANAME_K)
+def afes(k=False):
     """
     NAME:
 
@@ -39,7 +42,10 @@ def afes():
        2012-01-11 - Written - Bovy (IAS/@Tucson)
 
     """
-    return results['afe']
+    if k:
+        return results_k['afe']
+    else:
+        return results['afe']
 
 def abundanceDist(feh,afe,z=None,r=None,number=False):
     """
@@ -155,7 +161,7 @@ def dfehdr(z=1000.,r=None,feh=None,afe=None):
         /numpy.sum(w[indx])**2.\
         *numpy.sum(w[indx]/hrs[indx])
 
-def fehs():
+def fehs(k=False):
     """
     NAME:
 
@@ -178,9 +184,12 @@ def fehs():
        2012-01-11 - Written - Bovy (IAS/@Tucson)
 
     """
-    return results['feh']
+    if k:
+        return results_k['feh']
+    else:
+        return results['feh']
 
-def hr(feh,afe,err=False):
+def hr(feh,afe,err=False,k=False):
     """
     NAME:
 
@@ -207,19 +216,23 @@ def hr(feh,afe,err=False):
        2012-01-10 - Written - Bovy (IAS/@Tucson)
 
     """
+    if k:
+        tresults= results_k
+    else:
+        tresults= results
     #First determine whether this point lies within the fit range
-    if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-                     *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
+    if numpy.sum((numpy.fabs(tresults['feh']-feh) <= _DFEH/2.)\
+                     *(numpy.fabs(tresults['afe']-afe) <= _DAFE/2.)) == 0.:
         return numpy.nan
     #Then find the relevant bin
-    indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-        *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    indx= (numpy.fabs(tresults['feh']-feh) <= _DFEH/2.)\
+        *(numpy.fabs(tresults['afe']-afe) <= _DAFE/2.)
     if err:
-        return (results['hr'][indx][0],results['hr_err'][indx][0])
+        return (tresults['hr'][indx][0],tresults['hr_err'][indx][0])
     else:
-        return results['hr'][indx][0]
+        return tresults['hr'][indx][0]
 
-def hz(feh,afe,err=False):
+def hz(feh,afe,err=False,k=False):
     """
     NAME:
 
@@ -246,17 +259,21 @@ def hz(feh,afe,err=False):
        2012-01-10 - Written - Bovy (IAS/@Tucson)
 
     """
+    if k:
+        tresults= results_k
+    else:
+        tresults= results
     #First determine whether this point lies within the fit range
-    if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-                     *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
+    if numpy.sum((numpy.fabs(tresults['feh']-feh) <= _DFEH/2.)\
+                     *(numpy.fabs(tresults['afe']-afe) <= _DAFE/2.)) == 0.:
         return numpy.nan
     #Then find the relevant bin
-    indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-        *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    indx= (numpy.fabs(tresults['feh']-feh) <= _DFEH/2.)\
+        *(numpy.fabs(tresults['afe']-afe) <= _DAFE/2.)
     if err:
-        return (results['hz'][indx][0],results['hz_err'][indx][0])
+        return (tresults['hz'][indx][0],tresults['hz_err'][indx][0])
     else:
-        return results['hz'][indx][0]
+        return tresults['hz'][indx][0]
 
 def meanfeh(z=1000.,r=None):
     """
@@ -455,7 +472,8 @@ def meansigmaz(z=1000.,r=None):
     #Then return
     return numpy.sqrt(numpy.sum(w*sz**2.)/numpy.sum(w))
 
-def sigmaz(feh,afe,z=None,r=None,err=False,smooth=False,smoothfunc=numpy.mean):
+def sigmaz(feh,afe,z=None,r=None,err=False,smooth=False,smoothfunc=numpy.mean,
+           k=False):
     """
     NAME:
 
@@ -509,27 +527,32 @@ def sigmaz(feh,afe,z=None,r=None,err=False,smooth=False,smoothfunc=numpy.mean):
         return smoothfunc(allsz[True-numpy.isnan(allsz)])
     elif smooth and err:
         raise NotImplementedError("sigmaz with smooth=True and err=True not implemented yet")
+    if k:
+        tresults= results_k
+    else:
+        tresults= results
     if r is None:
         r= 8.
     #First determine whether this point lies within the fit range
-    if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-                     *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
+    if numpy.sum((numpy.fabs(tresults['feh']-feh) <= _DFEH/2.)\
+                     *(numpy.fabs(tresults['afe']-afe) <= _DAFE/2.)) == 0.:
         return numpy.nan
     #Then find the relevant bin
-    indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-        *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    indx= (numpy.fabs(tresults['feh']-feh) <= _DFEH/2.)\
+        *(numpy.fabs(tresults['afe']-afe) <= _DAFE/2.)
     if z is None:
-        z= results['zmedian'][indx][0]
+        z= tresults['zmedian'][indx][0]
     if err:
-        if z != results['zmedian'][indx][0]:
+        if z != tresults['zmedian'][indx][0]:
             raise NotImplementedError("Err for sigmaz not implemented for z =/= zmedian")
-        return (results['sz'][indx][0],results['sz_err'][indx][0])
+        return (tresults['sz'][indx][0],tresults['sz_err'][indx][0])
     else:
-        d= (z-results['zmedian'][indx][0])/1000.
-        return (results['sz'][indx][0]+d*results['p1'][indx][0]\
-            +d**2.*results['p2'][indx][0])*math.exp(-(r-8.)/results['hsz'][indx][0])
+        d= (z-tresults['zmedian'][indx][0])/1000.
+        return (tresults['sz'][indx][0]+d*tresults['p1'][indx][0]\
+            +d**2.*tresults['p2'][indx][0])*math.exp(-(r-8.)/tresults['hsz'][indx][0])
 
-def sigmar(feh,afe,z=None,r=None,err=False,smooth=False,smoothfunc=numpy.mean):
+def sigmar(feh,afe,z=None,r=None,err=False,smooth=False,smoothfunc=numpy.mean,
+           k=False):
     """
     NAME:
 
@@ -587,25 +610,29 @@ def sigmar(feh,afe,z=None,r=None,err=False,smooth=False,smoothfunc=numpy.mean):
         raise NotImplementedError("sigmaz with smooth=True and err=True not implemented yet")
     if r is None:
         r= 8.
+    if k:
+        tresults= results_k
+    else:
+        tresults= results
     #First determine whether this point lies within the fit range
-    if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-                     *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
+    if numpy.sum((numpy.fabs(tresults['feh']-feh) <= _DFEH/2.)\
+                     *(numpy.fabs(tresults['afe']-afe) <= _DAFE/2.)) == 0.:
         return numpy.nan
     #Then find the relevant bin
-    indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-        *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    indx= (numpy.fabs(tresults['feh']-feh) <= _DFEH/2.)\
+        *(numpy.fabs(tresults['afe']-afe) <= _DAFE/2.)
     if z is None:
-        z= results['zmedian'][indx][0]
+        z= tresults['zmedian'][indx][0]
     if err:
-        if z != results['zmedian'][indx][0]:
+        if z != tresults['zmedian'][indx][0]:
             raise NotImplementedError("Err for sigmaz not implemented for z =/= zmedian")
-        return (results['sr'][indx][0],results['sr_err'][indx][0])
+        return (tresults['sr'][indx][0],tresults['sr_err'][indx][0])
     else:
-        d= (z-results['zmedian'][indx][0])/1000.
-        return (results['sr'][indx][0]+0.*d*results['p1'][indx][0]\
-                    +0.*d**2.*results['p2'][indx][0])*math.exp(-(r-8.)/results['hsr'][indx][0])
+        d= (z-tresults['zmedian'][indx][0])/1000.
+        return (tresults['sr'][indx][0]+0.*d*tresults['p1'][indx][0]\
+                    +0.*d**2.*tresults['p2'][indx][0])*math.exp(-(r-8.)/tresults['hsr'][indx][0])
 
-def sigmazSlope(feh,afe,err=False):
+def sigmazSlope(feh,afe,err=False,k=False):
     """
     NAME:
 
@@ -632,19 +659,23 @@ def sigmazSlope(feh,afe,err=False):
        2012-01-10 - Written - Bovy (IAS/@Tucson)
 
     """
+    if k:
+        tresults= results_k
+    else:
+        tresults= results
     #First determine whether this point lies within the fit range
-    if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-                     *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
+    if numpy.sum((numpy.fabs(tresults['feh']-feh) <= _DFEH/2.)\
+                     *(numpy.fabs(tresults['afe']-afe) <= _DAFE/2.)) == 0.:
         return numpy.nan
     #Then find the relevant bin
-    indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-        *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    indx= (numpy.fabs(tresults['feh']-feh) <= _DFEH/2.)\
+        *(numpy.fabs(tresults['afe']-afe) <= _DAFE/2.)
     if err:
-        return (results['p1'][indx][0],results['p1_err'][indx][0])
+        return (tresults['p1'][indx][0],tresults['p1_err'][indx][0])
     else:
-        return results['p1'][indx][0]
+        return tresults['p1'][indx][0]
 
-def sigmazCurv(feh,afe,err=False):
+def sigmazCurv(feh,afe,err=False,k=False):
     """
     NAME:
 
@@ -671,17 +702,21 @@ def sigmazCurv(feh,afe,err=False):
        2012-05-03 - Written - Bovy (IAS)
 
     """
+    if k:
+        tresults= results_k
+    else:
+        tresults= results
     #First determine whether this point lies within the fit range
-    if numpy.sum((numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-                     *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)) == 0.:
+    if numpy.sum((numpy.fabs(tresults['feh']-feh) <= _DFEH/2.)\
+                     *(numpy.fabs(tresults['afe']-afe) <= _DAFE/2.)) == 0.:
         return numpy.nan
     #Then find the relevant bin
-    indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
-        *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
+    indx= (numpy.fabs(tresults['feh']-feh) <= _DFEH/2.)\
+        *(numpy.fabs(tresults['afe']-afe) <= _DAFE/2.)
     if err:
-        return (results['p2'][indx][0],results['p2_err'][indx][0])
+        return (tresults['p2'][indx][0],tresults['p2_err'][indx][0])
     else:
-        return results['p2'][indx][0]
+        return tresults['p2'][indx][0]
 
 def plotPixelFunc(feh,afe,z,
                   fehmin=-1.6,fehmax=0.5,afemin=-0.05,afemax=0.55,
