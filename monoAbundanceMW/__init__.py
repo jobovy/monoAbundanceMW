@@ -130,7 +130,7 @@ def dfehdr(z=1000.,r=None,feh=None,afe=None):
 
     OUTPUT:
 
-       d<[Fe/H]>/dR(z)
+       d<[Fe/H]>/dR(z) in dex/kpc
 
     HISTORY:
 
@@ -160,6 +160,59 @@ def dfehdr(z=1000.,r=None,feh=None,afe=None):
         +numpy.sum(w[indx]*results['feh'][indx])\
         /numpy.sum(w[indx])**2.\
         *numpy.sum(w[indx]/hrs[indx])
+
+def dfehdz(z=1000.,r=None,feh=None,afe=None):
+    """
+    NAME:
+
+       dfehdz
+
+    PURPOSE:
+
+       return the vertical [Fe/H] gradient at (R,z)
+
+    INPUT:
+
+       z= height in pc
+
+       r= Galactocentric distance (kpc)
+
+       feh= (default: None) range in feh to consider
+
+       afe= (default: None) range in afe to consider
+
+    OUTPUT:
+
+       d<[Fe/H]>/dZ(R,z) in dex/kpc
+
+    HISTORY:
+
+       2013-08-02 - Written - Bovy (IAS)
+
+    """
+    #First get the weights and hzs
+    w= numpy.zeros(len(results['afe']))
+    hzs= numpy.zeros_like(w)
+    for ii in range(len(results['afe'])):
+        w[ii]= abundanceDist(results['feh'][ii],results['afe'][ii],
+                             z=z,r=r,number=False)
+        hzs[ii]= hz(results['feh'][ii],results['afe'][ii])/1000.
+    if False:
+        #Cut out pops with undetermined scale lengths (very little mass)
+        indx= (hrs < 4.5)
+        #indx= (results['afe'] >= 0.05)*(results['afe'] < 0.1)
+    else:
+        indx= numpy.zeros(len(w),dtype='bool')+True
+    if not feh is None:
+        indx= indx*(results['feh'] > feh[0])*(results['feh'] < feh[1])
+    if not afe is None:
+        indx= indx*(results['afe'] > afe[0])*(results['afe'] < afe[1])
+    #Then return
+    return -numpy.sum(w[indx]/hzs[indx]*results['feh'][indx])\
+        /numpy.sum(w[indx])\
+        +numpy.sum(w[indx]*results['feh'][indx])\
+        /numpy.sum(w[indx])**2.\
+        *numpy.sum(w[indx]/hzs[indx])
 
 def fehs(k=False):
     """
