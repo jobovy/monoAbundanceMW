@@ -328,7 +328,7 @@ def hz(feh,afe,err=False,k=False):
     else:
         return tresults['hz'][indx][0]
 
-def meanfeh(z=1000.,r=None):
+def meanfeh(z=1000.,r=None,indx=None):
     """
     NAME:
 
@@ -344,6 +344,8 @@ def meanfeh(z=1000.,r=None):
 
        r= Galactocentric distance (kpc)
 
+       indx= if given, use only these MAPs
+
     OUTPUT:
     
        mean [Fe/H]at height z
@@ -358,6 +360,8 @@ def meanfeh(z=1000.,r=None):
     for ii in range(len(results['afe'])):
         w[ii]= abundanceDist(results['feh'][ii],results['afe'][ii],
                              z=z,r=r,number=False)
+    if not indx is None:
+        w[True-indx]= 0.
     if False:
         #Cut out pops with undetermined scale lengths (very little mass)
         #indx= (hrs < 4.5)
