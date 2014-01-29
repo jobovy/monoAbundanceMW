@@ -65,7 +65,7 @@ def abundanceDist(feh,afe,z=None,r=None,number=False):
 
        z= default=None: integrated over height; if set to number, evaluate at this height, if set to range, integrated between these numbers (can have None to indicate zero or infinity) [pc]
 
-       r= default=None: Galactocentric radius in kpc
+       r= default=None=8 kpc: Galactocentric radius in kpc; can be a range as well
 
        number= (default: False) if True, return the number density of G-type dwarfs
 
@@ -86,7 +86,12 @@ def abundanceDist(feh,afe,z=None,r=None,number=False):
     indx= (numpy.fabs(results['feh']-feh) <= _DFEH/2.)\
         *(numpy.fabs(results['afe']-afe) <= _DAFE/2.)
     if not r is None:
-        rFactor= numpy.exp(-(r-8.)/hr(results['feh'][indx],results['afe'][indx]))
+        if isinstance(r,list):
+            thr= hr(results['feh'][indx],results['afe'][indx])
+            rFactor= numpy.exp(-(r[0]-8.)/thr)*thr*(thr+r[0])\
+                -numpy.exp(-(r[1]-8.)/thr)*thr*(thr+r[1])
+        else:
+            rFactor= numpy.exp(-(r-8.)/hr(results['feh'][indx],results['afe'][indx]))
     else: rFactor= 1.
     if number:
         numberFactor= _omegafeh(feh)/_mgfeh(feh)
