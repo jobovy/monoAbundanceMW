@@ -54,11 +54,11 @@ FITS file
 
 The results are also available in `this FITS file
 <https://github.com/jobovy/monoAbundanceMW/blob/master/monoAbundanceMW/data/monoAbundanceResults.fits>`__,
-which you can download by clicking on ``raw``. This file has the
-fit results for each bin, and contains the [Fe/H], [a/Fe] that the bin
-is centered on, and all of the parameters describing the density and
-velocity dispersion. I think the parameter names are pretty
-self-explanatory, here's a quick overview::
+which you can download by clicking on ``raw``. This file has the fit
+results for each bin, and contains the [Fe/H], [a/Fe] that the bin is
+centered on, and all of the parameters describing the density and
+velocity dispersion. The parameter names are pretty self-explanatory,
+but here's a quick overview::
 
 		  feh: metallicity
 		  afe: alpha-enhancement
