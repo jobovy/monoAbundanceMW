@@ -65,7 +65,7 @@ but here's a quick overview::
 		  hz: scale height in pc
 		  hr: scale length in kpc
 		  hz_err, hr_err: errors on the two above
-		  mass: total surface density in Msolar/pc^2
+		  mass: total surface density in Msolar/pc^2 (note that there is a factor of (0.58-0.45)/(0.55-0.48) missing from the surface densities that they need to be multiplied with)
 		  zmedian: median height of the data sample in pc (this is the pivot for
 		  the kinematics fits)
 		  sz: vertical dispersion in km/s at zmedian
